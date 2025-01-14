@@ -13,6 +13,8 @@ public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false, unique = true)
+    private String name;  // Nouveau champ pour le nom du fichier
     @Column(columnDefinition = "TEXT")
     private String content;
 }

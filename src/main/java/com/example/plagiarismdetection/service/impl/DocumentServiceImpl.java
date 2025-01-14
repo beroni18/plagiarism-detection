@@ -3,6 +3,7 @@ package com.example.plagiarismdetection.service.impl;
 import com.example.plagiarismdetection.model.Document;
 import com.example.plagiarismdetection.repository.DocumentRepository;
 import com.example.plagiarismdetection.service.DocumentService;
+import com.example.plagiarismdetection.dto.PlagiarismResult;
 import com.example.plagiarismdetection.util.NGramUtil;
 import com.example.plagiarismdetection.util.SimilarityUtil;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -39,8 +41,33 @@ public class DocumentServiceImpl implements DocumentService {
     public double detectPlagiarism(Document doc1, Document doc2) {
         List<String> ngramsDoc1 = NGramUtil.generateNGrams(doc1.getContent(), 3); // 3-grammes
         List<String> ngramsDoc2 = NGramUtil.generateNGrams(doc2.getContent(), 3);
-
         return SimilarityUtil.jaccardSimilarity(ngramsDoc1, ngramsDoc2);
+    }
+
+    @Override
+    public double detectPlagiarismByName(String doc1Name, String doc2Name) {
+        Document doc1 = documentRepository.findByName(doc1Name);
+        Document doc2 = documentRepository.findByName(doc2Name);
+        if (doc1 == null || doc2 == null) {
+            throw new IllegalArgumentException("Un ou les deux documents n'ont pas été trouvés");
+        }
+        return detectPlagiarism(doc1, doc2);
+    }
+
+    @Override
+    public List<PlagiarismResult> checkPlagiarismMultipleByName(List<String> documentNames) {
+        List<PlagiarismResult> results = new ArrayList<>();
+        List<Document> documents = documentRepository.findByNameIn(documentNames);
+
+        for (int i = 0; i < documents.size(); i++) {
+            Document doc1 = documents.get(i);
+            for (int j = i + 1; j < documents.size(); j++) {
+                Document doc2 = documents.get(j);
+                double similarity = detectPlagiarism(doc1, doc2);
+                results.add(new PlagiarismResult(doc1.getName(), doc2.getName(), similarity));
+            }
+        }
+        return results;
     }
 
     @Override
