@@ -4,8 +4,13 @@ FROM maven:3.8.1-openjdk-17
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copier le fichier pom.xml et les sources dans le conteneur
+# Copier le fichier pom.xml dans le conteneur
 COPY pom.xml ./
+
+# Télécharger les dépendances (cela permet de profiter du cache Docker)
+RUN mvn dependency:go-offline
+
+# Copier le reste des fichiers source dans le conteneur
 COPY src ./src
 
 # Compiler le projet et générer le fichier JAR en ignorant les tests
