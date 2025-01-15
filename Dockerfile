@@ -1,15 +1,15 @@
 # Utiliser l'image OpenJDK 17
 FROM openjdk:17-oracle
 
+# Installer Maven
+RUN apt-get update && apt-get install -y maven
+
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
 # Copier le fichier pom.xml et les sources dans le conteneur
 COPY pom.xml ./
 COPY src ./src
-
-# Installer Maven
-RUN apt-get update && apt-get install -y maven
 
 # Compiler le projet et générer le fichier JAR
 RUN mvn clean install
