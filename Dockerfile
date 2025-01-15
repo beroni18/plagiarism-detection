@@ -1,26 +1,17 @@
-# Utiliser l'image Maven avec OpenJDK 17
-FROM maven:3.8.1-openjdk-17
+# Utiliser l'image OpenJDK 17
+FROM openjdk:17-jdk
 
-# Définir le répertoire de travail dans le conteneur
+# Définir le répertoire de travail
 WORKDIR /app
 
-# Copier le fichier pom.xml dans le conteneur
-COPY pom.xml ./
-
-# Télécharger les dépendances (cela permet de profiter du cache Docker)
-RUN mvn dependency:go-offline
-
-# Copier le reste des fichiers source dans le conteneur
-COPY src ./src
-
-# Compiler le projet et générer le fichier JAR en ignorant les tests
-RUN mvn clean install -DskipTests
-
-# Copier le fichier JAR généré dans le conteneur
+# Copier le fichier JAR dans l'image
 COPY target/plagiarism-detection-0.0.1-SNAPSHOT.jar app.jar
 
-# Exposer le port 8083, utilisé par votre application
+# Exposer le port sur lequel l'application écoute
 EXPOSE 8083
 
-# Définir le point d'entrée pour exécuter l'application
+# Définir la variable d'environnement PORT
+ENV PORT=8083
+
+# Commande pour exécuter l'application
 ENTRYPOINT ["java", "-jar", "app.jar"]
